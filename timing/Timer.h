@@ -130,7 +130,7 @@ namespace simple_timer {
 	};
 
 	/*
-	full specializations of the duration_to_time class for s, m, u, and n
+	specializations of the duration_to_time class for s, m, u, and n
 	*/
 	
 	template<typename precision>
