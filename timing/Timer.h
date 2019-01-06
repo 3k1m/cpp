@@ -41,8 +41,8 @@ auto measured2 = t3.tock(); // measures time duration for do_code2
 std::cout << measured1 << ' ' << measured2;
 */
 
-#ifndef _TIMER_
-#define _TIMER_
+#ifndef _SIMPLE_TIMER__TIMER_
+#define _SIMPLE_TIMER__TIMER_
 
 #include<chrono>
 #include<iostream>
