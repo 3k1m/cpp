@@ -21,6 +21,8 @@ Proceedings of the 13th EPIA 2007 - Portuguese Conference on Artificial Intellig
 Guimaraes, Portugal, pp. 512-523, 2007. APPIA, ISBN-13 978-989-95618-0-9.
 Available at: http://www.dsi.uminho.pt/~pcortez/fires.pdf
 
+The columns/info used were: FFMC	DMC	DC	ISI	temp	RH	wind	rain	area
+
 In general, data should be normalized before being fed into the neural network. The last column should be
 the ground truth. It seems the mnist is fine without being first normalized, at least here...
 
