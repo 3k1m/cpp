@@ -1,5 +1,5 @@
 /**
-This file defines a function, display_info, that displays the value category and type of its argument. 
+This file defines a function, check_it, that displays the value category and type of its argument. 
 
 For the most part, the value category is the most important is it can be the least intuitive without practice. Note: the types displayed 
 may seem very strange, depending on the compiler: i for int, e for long double, Pk for pointer to const, etc.
