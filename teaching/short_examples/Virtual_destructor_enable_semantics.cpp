@@ -14,9 +14,9 @@ struct B{
   Foo f{};
   B(){}
   B(const B&) = default;
-  B(B&&) = default;
+  B(B&&) noexcept = default;
   B& operator=(const B&) = default;
-  B& operator=(B&&) = default;
+  B& operator=(B&&) noexcept = default;
   virtual ~B()=default;
 };
 
