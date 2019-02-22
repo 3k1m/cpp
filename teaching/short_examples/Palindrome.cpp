@@ -8,10 +8,10 @@ Run this code with a C++17 compiler such as this one: https://wandbox.org/
 
 /**
 This function determines if a string of chars is a palindrome
-@param s a basic_string_view object, can be constructed from a string literal
+@param s a string_view object, can be constructed from a string literal or char*
 @return whether it is a palindrome
 */
-bool isPalindrome(const std::basic_string_view<char>& s) {
+bool isPalindrome(const std::string_view& s) {
 	if ( s.size() <= 1 ) { // true if empty or a single char
 		return true;
 	}
@@ -29,11 +29,11 @@ bool isPalindrome(const std::basic_string_view<char>& s) {
 int main()
 {
     std::string s("hello world");
-    std::basic_string_view<char> bs(s.c_str()); // c_str returns const char* within the string
+    std::string_view sv(s.c_str()); // c_str returns const char* within the string
 	
-	std::boolalpha(std::cout); // make it display true as 'true' and false as 'false'
+    std::boolalpha(std::cout); // make it display true as 'true' and false as 'false'
     
-    std::cout << isPalindrome(bs) << '\n';    
+    std::cout << isPalindrome(sv) << '\n';    
     std::cout << isPalindrome("abba") << '\n';
 
     return 0;
