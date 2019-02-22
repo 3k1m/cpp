@@ -8,7 +8,7 @@ This operator allows us to print a vector
 @return the stream
 */
 std::ostream& operator<<(std::ostream& out, const std::vector<int>& v){
- for(int i : v){
+ for(int i : v){ // print all v elements
   out << i << ' ';   
  }
  return out;
