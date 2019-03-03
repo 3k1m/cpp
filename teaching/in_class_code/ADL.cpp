@@ -1,3 +1,13 @@
+/**
+This illustrates ADL and fully-qualified lookup
+
+The friend bah function can be found via ADL, being called even without the X:: scope, provided
+it receives an argument within the X:: scope
+
+But unless bah is also declared at namespace scope, it cannot be looked up
+via X::bah
+*/
+
 #include<iostream>
 
 namespace X{
