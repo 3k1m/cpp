@@ -135,12 +135,19 @@ int main() {
 		return total_penalty(data, a0, a1, a2, a3, a4);
 	};
 	
-	basic_opt::NelderMead<5,float> ex3;
+	basic_opt::NelderMead<5, float> ex3;
 	ex3.set_objective(lam);
-	ex3.make_guess(0,0,0,0,0); // guess all zeros...
+
+	// we can also pass the guess function a param_vec object
+	basic_opt::param_vec<5, float> guess3{ 0,0,0,0,0 };
+	ex3.make_guess(guess3); // guess all zeros...
+	
 	ex3.iteration_display(false); // don't show progress until end
 	std::cout << "EXAMPLE 3\n";
 	ex3.run(1000);
+	
+	std::cout << "Program finished. Press ENTER to terminate.\n";
+	std::cin.get();	
 
 	return 0;
 }
