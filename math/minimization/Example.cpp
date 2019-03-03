@@ -92,7 +92,6 @@ int main() {
 	// EXAMPLE #1: we minimize a function of 2 variables f(x,y) = x^2+y^2
 	// minimum is at (0,0) with value 0
 	// we use a free function objective
-	std::cout << "EXAMPLE 1\n";
 	basic_opt::NelderMead<2,double> ex1;	
 	ex1.set_objective(f); // use function pointer	
 	ex1.make_guess(11,200); // starting guess
