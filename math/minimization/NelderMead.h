@@ -356,7 +356,7 @@ namespace basic_opt {
 
 		/* special constants for algorithm */
 		
-		const precision rho = 1, chi = 2, gamma = 0.5, sigma = 0.5;
+		static constexpr precision rho = 1, chi = 2, gamma = 0.5, sigma = 0.5;
 		
 		/* member variables */
 
