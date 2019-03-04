@@ -546,7 +546,7 @@ namespace basic_opt {
 	template<size_t param_count, typename precision>
 	template<typename Fun>
 	void NelderMead<param_count,precision>::set_objective(Fun&& _obj){
-		obj = [&](const param_type& v)-> precision {
+		obj = [=](const param_type& v)-> precision {
 			return unpack<param_count>(_obj, v);
 		};
 	}
