@@ -1,4 +1,4 @@
-**Memory Leaks**
+**Memory Leaks (for Visual Studio)**
 
 This allows for a simple and very *un*-sophisticated way for debugging memory leaks. The code works in Visual Studio 2017. Due to its simplicity and some compiler-dependent options, it is not valid for Clang or gcc.
 
