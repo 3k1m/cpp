@@ -8,10 +8,10 @@
 new and delete expressions, etc. It has not been tested on other compilers and more elaborate
 memory allocation may cause it to fail!
 To use this: ensure this .cpp file is compiled with other files in your project directory. So in Visual Studio,
-just include it as a .cpp file (no need to #include it); with gcc, compile your files with
+just include it in your solution as a .cpp file (no need to #include it with a preprocessor directive!); 
+with gcc, compile your files with
 g++ -std=c++11 SimpleMemory.cpp YourOtherFiles.cpp
-etc.
-
+or whatever settings you like to use.
 
 As an example if what it will produce with a file:
 
