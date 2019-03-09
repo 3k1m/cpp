@@ -24,9 +24,9 @@ int main()
 	*/
 	_BEGIN_MEMORY_CHECK_	
 	
-    int *i = new int;
-    std::string s("a very very very very very very very long string");
-    delete i;
+	int *i = new int;
+	std::string s("a very very very very very very very long string");
+	delete i;
 	double *d = new double[53]();
 	delete[] d;
 	void *v = ::operator new(20);
