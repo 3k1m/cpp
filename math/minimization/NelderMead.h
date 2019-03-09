@@ -2,6 +2,7 @@
 @file NelderMead.h
 @author Mike Lindstrom
 @version 1
+@date March 2019
 @brief the Nelder-Mead algorithm is implemented in this file, which can be used
 to solve minimization problems without the need for a gradient
 
