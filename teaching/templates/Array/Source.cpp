@@ -13,7 +13,7 @@ This was written as an example for PIC 10B, UCLA
 int main() {
 	// array stores 3 zeros...
 	constexpr basic::Array<int, 3> ints;
-	constexpr basic::Array<int, 3>::ArrayView view = ints.get_view();
+	basic::Array<int, 3>::ArrayView view = ints.get_view();
 	print(view);
 
 	std::cout << '\n';
