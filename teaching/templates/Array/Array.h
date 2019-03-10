@@ -68,6 +68,17 @@ namespace basic {
 			return values[i];
 		}
 
+
+		/**
+		Coerce function constructs a T from possibly another data type. This
+		is really a warmup for the emplace function.
+		@tparam Type argument type
+		@param i the index value to overwrite
+		@param val the value used in construction
+		*/
+		template<typename Type>
+		constexpr void coerce(std::size_t i, const Type& val);
+
 		/**
 		Emplace function, constructs a T object from variadic list of arguments
 		at a given position
@@ -84,7 +95,7 @@ namespace basic {
 		@param past_end_index, index just past the end, N by default
 		*/
 		ArrayView get_view(std::size_t begin_index = 0,
-			std::size_t past_end_index = N) const;
+			std::size_t past_end_index = N) const &; // only allowed to view lvalues!
 	};
 
 	// definition of Array::ArrayView
@@ -123,8 +134,14 @@ namespace basic {
 	Array<T, N>::ArrayView::ArrayView(const T* _first, const T* _past_end) :
 		first(_first), past_end(_past_end) {}
 
-	// defining the emplace function
+	// defining the coerce and emplace functions
 	// note how outside the interface, we need to repeat both layers of templates!
+
+	template<typename T, std::size_t N>
+	template<typename Type>
+	constexpr void Array<T, N>::coerce(size_t i, const Type& val) {
+		values[i] = static_cast<T>( val ); // force any explicit conversions
+	}
 
 	template<typename T, std::size_t N>
 	template<typename ... Types>
@@ -137,7 +154,7 @@ namespace basic {
 
 	template<typename T, std::size_t N>
 	typename Array<T, N>::ArrayView Array<T,N>::get_view(std::size_t begin_index,
-		std::size_t past_end_index) const {
+		std::size_t past_end_index) const & {
 		return ArrayView(values + begin_index, values + past_end_index);
 	}
 
@@ -147,7 +164,7 @@ namespace basic {
 
 	/*template<typename T, std::size_t N>
 	auto Array<T, N>::get_view(std::size_t begin_index,
-		std::size_t past_end_index) const -> ArrayView {
+		std::size_t past_end_index) const & -> ArrayView {
 		return ArrayView(values + begin_index, values + past_end_index);
 	} */
 
