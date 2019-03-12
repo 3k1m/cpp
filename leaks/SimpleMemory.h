@@ -45,7 +45,7 @@ namespace simple_memory {
 	*/
 	struct Memory_Info {
 		// how many times new and delete operators already called
-		size_t init_news, init_deletes;		
+		std::size_t init_news, init_deletes;		
 
 		/**
 		Constructor: stores the initial new and delete calls
