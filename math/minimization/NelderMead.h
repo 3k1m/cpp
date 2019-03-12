@@ -23,6 +23,7 @@ Note: the file does require the inclusion of PatchIndex.h
 #include<array>
 #include<limits>
 #include<algorithm>
+#include<iostream>
 
 #include "PatchIndex.h"
 
