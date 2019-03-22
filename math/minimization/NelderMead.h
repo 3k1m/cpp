@@ -560,7 +560,7 @@ namespace basic_opt {
 		int iter = 0;
 		initialize(); // start the simplex			
 		order(); // place points in order						
-		while(iter < num_iter){				
+		while(iter < num_iter){	// run specified number of iterations			
 			bool reflected = reflect();	// whether reflect succeeds							
 			if(!reflected){ // so went on to expand or contract...
 				if(xr < points[0]){ // a new best						
