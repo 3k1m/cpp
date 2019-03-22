@@ -331,8 +331,8 @@ namespace basic_opt {
 	*/
 	template<size_t param_count, typename precision = double>
 	std::ostream& operator<<(std::ostream& o, const evaluation_point<param_count, precision>& p){
-		o << p.f << " | ";
-		for(const auto& i : p.x){
+		o << p.f << " | "; // print the function value
+		for(const auto& i : p.x){ // now print its inputs
 			o << i << ' ';
 		}
 		return o;
