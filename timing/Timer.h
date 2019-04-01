@@ -57,7 +57,7 @@ namespace simple_timer {
 	@tparam timer_type the type of time: 's', 'm', 'u', or 'n'
 	@tparam precision the level of precision we want
 	*/
-	template<char c, typename precision>
+	template<char timer_type, typename precision>
 	struct duration_to_time;
 
 	/**
