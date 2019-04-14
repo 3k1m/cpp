@@ -1,15 +1,16 @@
 /**
 @file BasicString.h
-@author Mike Lindstrom
+@author Michael Lindstrom
 
 @brief This is the header file for a very simple string class
 
 See Source.cpp for remarks. This is for PIC 10B, UCLA
+(c) Michael Lindstrom
 */
 
 
-#ifndef ___BASIC_STRING___
-#define ___BASIC_STRING___
+#ifndef _BASIC__STRING_
+#define _BASIC__STRING_
 
 #include<memory>
 #include<iostream>
@@ -45,6 +46,20 @@ namespace basic {
 		@param other the string reaching the end of its lifetime
 		*/
 		string(string&& other);
+		
+		/**
+		Copy assignment operator, makes left value same as right value
+		@param other the assigned-from string
+		@return the updated assigned-to string
+		*/
+		string& operator=(const string& other);
+		
+		/**
+		Move assignment operator, makes left value same as right value by harvesting its resources
+		@param other the assigned-from string
+		@return the updated assigned-to string
+		*/
+		string& operator=(string&& other);
 
 		/**
 		The destructor
@@ -63,9 +78,18 @@ namespace basic {
 		void print() const;
 
 		/**
-		The assignment operators are deleted
+		This non-const at function returns the char at the given index by reference
+		@param i the index value
+		@return the char at that index
 		*/
-		string& operator=(string) = delete;
+		char& at(size_t i);
+		
+		/**
+		This const at function returns the char at the given index by value
+		@param i the index value
+		@return the char at that index
+		*/
+		char at(size_t i) const;
 
 	private:
 		// pay attention to the two members below: they are discussed in lecture and the real backbone of the string class
