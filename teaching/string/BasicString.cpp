@@ -1,10 +1,11 @@
 /**
 @file BasicString.cpp
-@author Mike Lindstrom
+@author Michael Lindstrom
 
 @brief This file implements the string class declared in BasicString.h
 
 See Source.cpp for remarks. This is for PIC 10B, UCLA
+(c) Michael Lindstrom
 */
 
 #include "BasicString.h"
@@ -68,6 +69,33 @@ basic::string::string(string&& other) : string() { // invoke the default constru
 	type = "move"; // also gotta update the type tracking parameter since it would otherwise be "default"
 }
 
+
+basic::string& basic::string::operator=(const string& other) {
+	if(this == &other){ // self-assignment
+		return *this;
+	}
+	
+	char *old(ptr); // old location
+	ptr = new char[other.sz];
+	for(size_t i=0; i < other.sz; ++i){ // copy each char from other
+		ptr[i] = other.ptr[i];
+	}
+	
+	sz = other.sz;
+	
+	delete [] old; // free up old memory
+	
+	return *this;
+}
+
+
+basic::string& basic::string::operator=(string&& other) {
+	std::swap(ptr,other.ptr); // swap values and return
+	std::swap(sz, other.sz);
+	return *this;
+}
+
+
 basic::string::~string() { // when the object is destroyed, we print its information for illustration
 
 	std::cout << "Deleting string " << id << " - ";
@@ -108,6 +136,14 @@ void basic::string::print() const { // displays the id, the string contents, and
 	std::cout << id << ": ";
 	std::cout << ptr;
 	std::cout << " - created via " << type << '\n';
+}
+
+char& basic::string::at(size_t i) {
+	return ptr[i];
+}
+
+char basic::string::at(size_t i) const {
+	return ptr[i];
 }
 
 // need to define the static member of string
