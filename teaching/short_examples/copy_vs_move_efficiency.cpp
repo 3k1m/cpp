@@ -28,13 +28,15 @@ struct Has_Moves{
 
 /**
 This function calls No_Moves copy constructor 100 times
+@param v a vector to copy elements from
 */
-void do_copies(std::vector<No_Moves>&);
+void do_copies(std::vector<No_Moves>& v);
 
 /**
 This function calls Has_Moves move constructor 100 times
+@param v a vector to move elements from
 */
-void do_moves(std::vector<Has_Moves>&);
+void do_moves(std::vector<Has_Moves>& v);
 
 int main(){
     // make a vector that stores 1000 of each type of class
