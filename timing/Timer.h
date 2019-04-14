@@ -12,9 +12,8 @@ precision for those times can be done using float, double, or long double.
 
 The templated class timer is templated by the time duration and precision.
 
-Once created, it has a start function to begin timing,
-a stop function to stop timing, and
-a get function to obtain duration object, representing a time duration, which can be printed.
+Once created, it has a tick function to restart timing,
+and a tock function function to stop timing returning a duration object representing a time duration which can be printed.
 
 Examples:
 
