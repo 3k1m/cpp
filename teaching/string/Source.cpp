@@ -1,11 +1,12 @@
 /**
 @file Source.cpp
-@author Mike Lindstrom
+@author Michael Lindstrom
 
 @brief This file has a running main routine for a string class. Read the remarks below, especially item 4 if your are not using
 Visual Studio for compilation.
 
 This code illustrates the implementation of a basic string class. This is for PIC 10B, UCLA
+(c) Michael Lindstrom
 
 This file makes use of a string class defined and implemented in BasicString.h and BasicString.cpp
 
@@ -15,7 +16,7 @@ Important Remarks:
 RAII classes and memory management.
 
 2. The resulting outputs could vary from compiler to compiler due to various optimizations. There are differences
-between Windows Visual Studio 2017 and g++ (C++11), for example, in how well they elide initializations.
+between Windows Visual Studio 2017 and g++, for example, in how well they elide initializations.
 
 3. The .print() commands could be replaced by overloading and defining the << operator
 but at this point in time we stick to just using the print function. This implementation
@@ -29,6 +30,7 @@ been discussed in the course.
 */
 
 #include "BasicString.h"
+#include "SimpleMemory.h"
 
 /**
 This function returns a basic::string storing "Hello world!". Note that it makes a local variable and then returns
@@ -50,6 +52,8 @@ basic::string unnamed() {
 }
 
 int main() {
+	
+	_BEGIN_MEMORY_CHECK_
 
 	// new scope, stringNumber0 is first on the stack
 	basic::string stringNumber0; // default
@@ -139,11 +143,25 @@ int main() {
 
 		basic::string stringZ(named());		
 		std::cout << "stringZ: ";
-		stringZ.print();
+		stringZ.print();		
+		
+		stringW = stringZ; // copy assignment
+		std::cout << "stringW: ";
+		stringW.print();
 		std::cout << '\n';
-			
+		
+		stringX = std::move(stringW); // move assignment
+		std::cout << "stringX and stringW:\n";
+		stringX.print();
+		stringW.print();
+		std::cout << '\n';
+		
+		std::cout << "stringX char 0: " << stringX.at(0) << '\n';
+					
 		std::cout << "Now everything goes out of scope: " << '\n';
 	} // some descending series of ids will be displayed, but they may not be consecutive
+	
+	_END_MEMORY_CHECK_
 	
 	std::cin.get();
 
