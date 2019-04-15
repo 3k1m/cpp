@@ -1,7 +1,7 @@
 /**
 This demo illustrates the speed gain in using a move constructor by trying two functions, one that makes several copies of an
 object, the other that do a proper move of that object.
-This requires Timer.h found in the timer/ folder
+This requires Timer.h found here: https://github.com/3k1m/cpp/tree/master/timing
 */
 
 #include "Timer.h"
