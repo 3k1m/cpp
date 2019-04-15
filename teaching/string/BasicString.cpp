@@ -18,14 +18,7 @@ namespace basic { // open up the namespace
 
 	 // default constructor, size is initially 1 (null char), ptr points null, also tract constructor type and id
 	string::string() : sz(1), ptr(nullptr), type("default"), id(count++) {
-		try { // try to allocate memory
-			ptr = new char[1]{ '\0' };
-		}
-		catch (...) { // if this fails, free the memory and make pointer null
-			delete[] ptr;
-			ptr = nullptr;
-			throw;
-		}
+		ptr = new char[1]{ '\0' };		
 	}
 
 	// will copy data from a string literal
@@ -38,11 +31,9 @@ namespace basic { // open up the namespace
 
 		ptr = new char[sz]; // allocate appropriate size of array
 
-		for (size_t i = 0; char_ptr[i] != '\0'; ++i) { // and loop while chars not null
+		for (size_t i = 0; i < sz; ++i) { // and copy char from string literal to basic::string
 			ptr[i] = char_ptr[i];
 		}
-
-		ptr[sz - 1] = '\0'; // make the last char null
 
 	}
 
