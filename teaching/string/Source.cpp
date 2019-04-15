@@ -24,9 +24,8 @@ also deletes the implementations of the assignment operators.
 
 We haven't formally covered operator overloading in PIC 10B yet.
 
-4. The try and catch are listed only for illustration in the default constructor; other constructors could also use try
-and catch. This is important for more complicated classes and when exceptions have been discussed. Exceptions haven't yet
-been discussed in the course.
+4. To be discussed later: it can be dangerous to initialize a raw pointer with a new expression within the constructor
+initializer list: this is why we initially set it to nullptr.
 */
 
 #include "BasicString.h"
