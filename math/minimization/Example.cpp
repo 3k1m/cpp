@@ -96,7 +96,7 @@ int main() {
 	ex1.set_objective(f); // use function pointer	
 	ex1.make_guess(11,200); // starting guess
 	std::cout << "EXAMPLE 1\n";
-	ex1.run(50); // 100 iterations, want tol < 1.e-3
+	ex1.run(50); // 50 iterations
 	std::cout << '\n';
 	
 	// EXAMPLE #2: minimize the negative log likelihood of
