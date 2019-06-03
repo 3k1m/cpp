@@ -35,6 +35,10 @@ std::mutex THE_MUTEX;
 
 int main() {
 	std::srand(std::time(nullptr)); // seed
+	
+	// check how many threads (approximately) can be run concurrently:
+	std::cout << "This implementation supports " << std::thread::hardware_concurrency() <<
+		" concurrent threads.\n";
 
 	/* FIRST PART OF DEMO: THREADING THE BUSY_WORK FUNCTION */
 
