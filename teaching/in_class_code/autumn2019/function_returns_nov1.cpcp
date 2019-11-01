@@ -1,0 +1,60 @@
+// Example program
+#include <iostream>
+#include <string>
+
+// must return double
+double foo(){
+   // return "cat"; // ERROR: this cannot become a double
+    
+    // when return is reached, the function terminates. no more lines are run!
+ return 1.1;
+    
+    std::cout << "hello did you read me?";
+ 
+ return 2.3;
+ 
+ return -0.6;    
+}
+
+// nothing is returned... it returns void
+void greet() {
+ std::cout << "Good morning!\n";
+    
+   // return 6; // ERROR: must return void
+    
+ return; // function ends here. returning nothing
+ std::cout << "This is not printed.\n";   
+}
+
+
+// nothing is returned... it returns void
+void greet2() {
+ std::cout << "greet2: Good morning!\n";    
+ std::cout << "This is printed.\n";   
+} // finishes automatically here, with/without return
+
+
+void increment(int x){
+ ++x;   
+}
+
+
+int main()
+{
+    std::cout << foo() << '\n';
+    greet();
+    greet2();
+    
+    int a = 7;
+    increment(a);
+    std::cout << a << '\n';
+    
+    {
+     int x = a;
+     ++x;        
+    }
+    
+    std::cout << a << '\n';
+    
+  return 0;
+}
