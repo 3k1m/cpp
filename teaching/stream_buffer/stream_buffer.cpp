@@ -32,11 +32,11 @@ class in_wrap {
 private:
 	std::istringstream& i;  // stream it owns
 
-							/**
-							* will print a string but replace new lines, tabs, and
-							* spaces with \n, \t, and \s literally
-							* @param s the string to print
-							*/
+	/**
+	* will print a string but replace new lines, tabs, and
+	* spaces with \n, \t, and \s literally
+	* @param s the string to print
+	*/
 	void print_buffer_string(const std::string& s) const;
 
 public:
@@ -88,6 +88,42 @@ public:
 	*/
 	friend in_wrap& getline(in_wrap& w, std::string& s,
 		char end = '\n');
+
+	/**
+	* converts the wrapper to a bool
+	* @return the bool value of the stream
+	*/
+	explicit operator bool() const;
+
+	/**
+	* returns ! for the stream
+	* @return true if an error has occurred
+	*/
+	bool operator!() const;
+
+	/**
+	* returns if the stream is good
+	* @return true if the stream is not bad, not eof, not fail
+	*/
+	bool good() const;
+
+	/**
+	* returns if the stream has failed
+	@ return true if failed
+	*/
+	bool fail() const;
+
+	/**
+	* returns if the stream is in a bad state
+	* @return true if in a bad state
+	*/
+	bool bad() const;
+
+	/**
+	* returns eof if the end of file is triggered
+	* @return true if at EOF
+	*/
+	bool eof() const;
 };
 
 
@@ -100,7 +136,7 @@ int main()
 	// .86[ENTER]
 	// 86[ENTER]
 	//
-	std::istringstream iss("123.456\nfoo bar baz\n.86\n86\n");
+	std::istringstream iss("123.456\nfoo bar baz\n.86\n86\n4 5 6\n");
 
 	// make a wrapper object to handle this sequence of inputs
 	in_wrap in(iss);
@@ -128,6 +164,8 @@ int main()
 	in.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 	in >> e;
 	std::cout << "e: " << e << '\n';
+
+	
 	char f = in.get();
 	std::cout << "f: " << f << "done"; // f is a new line character
 
@@ -194,4 +232,28 @@ void in_wrap::clear() {
 	std::cout << "clear";
 	i.clear();
 	print();
+}
+
+in_wrap::operator bool() const {
+	return static_cast<bool>(i);
+}
+
+bool in_wrap::operator!() const {
+	return !i;
+}
+
+bool in_wrap::good() const {
+	return i.good();
+}
+
+bool in_wrap::fail() const {
+	return i.fail();
+}
+
+bool in_wrap::bad() const {
+	return i.bad();
+}
+
+bool in_wrap::eof() const {
+	return i.eof();
 }
