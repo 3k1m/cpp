@@ -2,21 +2,28 @@
 * @file stream_buffer.cpp
 * @author Mike Lindstrom
 * @date Nov 2019
+* @version 1.1
+*
 * @brief: this file illustrates how input streams work with
-* their buffers
+* their buffers. At some point this may be updated to tie
+* directly with std::cin
 *
 * @details: there is a class in_wrap that wraps around
-* in input string stream
+* in input string stream. To construct the class, one passes a
+* string representing a sequence of user input
 *
-* the input string stream (iss) in the example should be
+* user_input string in the example should be
 * initialized to a sequence of user input where \n
 * indicates [ENTER]/[RETURN]
 *
-* then the in_wrap object (in) in the example is initialized
-* from the stream
+* Then the in_wrap object (in) in the example is initialized
+* from the string
 *
-* in can be used to write to variables just like cin would
+* The in_wrap class called in can be used to write to variables just like cin would
 * and we can examine what is in the buffer
+*
+* Note that spaces, tabs, and newlines are displayed as \s, \t, and \n, respectively
+* but that means if the user literally wrote "\s", it would be displayed the same.
 *
 */
 #include <iostream>
@@ -30,7 +37,8 @@
 */
 class in_wrap {
 private:
-	std::istringstream& i;  // stream it owns
+	std::istringstream i;  // stream it owns
+	decltype(i.tellg()) pos; // current position
 
 	/**
 	* will print a string but replace new lines, tabs, and
@@ -42,12 +50,12 @@ private:
 public:
 	/**
 	* constructor is given stream to manage
-	* @param _i the input string stream to manipulate
+	* @param _buff the initial buffer in the stream
 	*/
-	explicit in_wrap(std::istringstream& _i);
+	explicit in_wrap(std::string _buff);
 
 	/**
-	* displays the stream data in format
+	* displays the stream data in format 
 	* [[[position: stream index & buffer:what is in the buffer]]]
 	*/
 	void print() const;
@@ -72,7 +80,7 @@ public:
 	* @param n the maximum number of chars to ignore
 	* @param end where to end if n is not exceeded
 	*/
-	void ignore(
+	in_wrap& ignore(
 		std::streamsize n = 1, char end = EOF);
 
 	/**
@@ -136,10 +144,10 @@ int main()
 	// .86[ENTER]
 	// 86[ENTER]
 	//
-	std::istringstream iss("123.456\nfoo bar baz\n.86\n86\n4 5 6\n");
+	std::string user_input("123.456\nfoo bar baz\n.86\n86\n");
 
 	// make a wrapper object to handle this sequence of inputs
-	in_wrap in(iss);
+	in_wrap in(user_input);
 
 	// show what is originally there
 	// new lines are \n, tabs are \t, and space is \s here
@@ -174,6 +182,8 @@ int main()
 	return 0;
 }
 
+// the definitions
+
 void in_wrap::print_buffer_string(const std::string& s) const {
 	for (char c : s) { // go over every char separately
 		switch (c) {
@@ -185,15 +195,15 @@ void in_wrap::print_buffer_string(const std::string& s) const {
 	}
 }
 
-in_wrap::in_wrap(std::istringstream& _i) : i(_i) {}
+in_wrap::in_wrap(std::string _buff) : i(std::move(_buff)), pos(i.tellg()) {}
 
 void in_wrap::print() const {
 	if (i.fail()) { // if it failed say so
 		std::cout << "[[[FAILED]]]" << '\n';
 	}
 	else { // otherwise give the printout
-		std::cout << "[[[position:" << i.tellg() << " & buffer:";
-		print_buffer_string(i.str().substr(i.tellg()));
+		std::cout << "[[[position:" << pos << " & buffer:";
+		print_buffer_string(i.str().substr(pos));
 		std::cout << "]]]\n";
 	}
 }
@@ -203,6 +213,7 @@ template<typename T>
 in_wrap& in_wrap::operator>>(T& t) {
 	std::cout << "operator>>";
 	i >> t;
+	pos = i.tellg();
 	print();
 	return *this;
 }
@@ -210,20 +221,24 @@ in_wrap& in_wrap::operator>>(T& t) {
 char in_wrap::get() {
 	std::cout << "get";
 	char c = i.get();
+	pos = i.tellg();
 	print();
 	return c;
 }
 
-void in_wrap::ignore(
+in_wrap& in_wrap::ignore(
 	std::streamsize n, char end) {
 	std::cout << "ignore";
 	i.ignore(n, end);
+	pos = i.tellg();
 	print();
+	return *this;
 }
 
 in_wrap& getline(in_wrap& w, std::string& s, char end) {
 	std::cout << "getline";
 	std::getline(w.i, s, end);
+	w.pos = w.i.tellg();
 	w.print();
 	return w;
 }
@@ -231,6 +246,7 @@ in_wrap& getline(in_wrap& w, std::string& s, char end) {
 void in_wrap::clear() {
 	std::cout << "clear";
 	i.clear();
+	pos = i.tellg();
 	print();
 }
 
