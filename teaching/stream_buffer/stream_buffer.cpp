@@ -71,14 +71,15 @@ public:
 
 	/**
 	* gets a char from the stream
-	* @return the char
+	* @return the char (as an int)
 	*/
-	char get();
+	int get();
 
 	/**
 	* ignores next parts of the stream
 	* @param n the maximum number of chars to ignore
 	* @param end where to end if n is not exceeded
+	* @return the stream
 	*/
 	in_wrap& ignore(
 		std::streamsize n = 1, char end = EOF);
@@ -218,9 +219,9 @@ in_wrap& in_wrap::operator>>(T& t) {
 	return *this;
 }
 
-char in_wrap::get() {
+int in_wrap::get() {
 	std::cout << "get";
-	char c = i.get();
+	int c = i.get();
 	pos = i.tellg();
 	print();
 	return c;
