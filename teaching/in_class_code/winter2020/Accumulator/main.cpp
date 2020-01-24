@@ -1,8 +1,6 @@
 #include<iostream> // C++ standard get < >
 #include "Accumulator.h" // our own get " "
 
-#include<string>
-
 using namespace std;
 
 
