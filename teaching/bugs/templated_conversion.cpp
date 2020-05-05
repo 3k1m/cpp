@@ -22,4 +22,5 @@ int main()
   Bar<double> b;
   Foo<double> f = static_cast<Foo<double>>(b); // ERROR!
   f.bah();
+  return 0;
 }
