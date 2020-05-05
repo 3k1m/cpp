@@ -13,7 +13,7 @@ struct Bar{
     // otherwise one has to call upon a templated 
     // conversion operator
     template<typename S>
-    explicit operator foo_type() const { return foo_type{}; }
+    explicit operator foo_type() const { return {}; }
    
 };
 
