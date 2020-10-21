@@ -26,3 +26,5 @@ public:
 private:
   double val;
 };
+
+#endif
