@@ -94,7 +94,7 @@ struct Foo_init_list{
 	/**
 	default constructor: uses constructor initializer list
 	*/
-	Foo_init_list() : v(14) {}
+	Foo_init_list() : v(1) {}
 };
 
 struct Foo_in_body{
@@ -104,7 +104,7 @@ struct Foo_in_body{
 	default constructor: resets member in body
 	*/
 	Foo_in_body() {
-		v = std::vector<int>(14); // does not use constructor initializer list
+		v = std::vector<int>(1); // does not use constructor initializer list
 	}
 };
 
