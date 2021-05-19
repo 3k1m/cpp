@@ -9,7 +9,6 @@
 std::mutex THE_MUTEX;
 
 class nano_timer {
-	// useful bug: wrote wrong clock here and got error using steady later :)
 	std::chrono::time_point<std::chrono::steady_clock> start;
 public:
 	nano_timer() : start(std::chrono::steady_clock::now()) {}
