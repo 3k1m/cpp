@@ -276,7 +276,7 @@ int main() {
 			}
 		}
 		
-		int total_time = timer.getElapsedTime().asSeconds();
+		float total_time = timer.getElapsedTime().asSeconds();
 		int total_elapsed = static_cast<int>(total_time);
 		int hrs = total_elapsed / sec_per_hr;
 		total_elapsed %= sec_per_hr;
