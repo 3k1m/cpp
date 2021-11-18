@@ -64,37 +64,13 @@ int main(){
 			}
 		}
 
-		// compute the sum of all the columns
-
-		std::unique_ptr<float[]> sum_fast(new float[sz]());
-		std::unique_ptr<float[]> sum_slow(new float[sz]());		
-
-		nano_timer timer;
-
-		for(size_t i=0; i < sz; ++i){
-			for(size_t j=0; j < sz;++j){ // local for j
-				sum_fast[i] += A[i*sz+j];
-			}
-		}		
-
-		double sum_fast_time = timer;
-		timer();
-
-		for (size_t j = 0; j < sz; ++j) {
-			for (size_t i = 0; i < sz; ++i) { // not local
-				sum_slow[i] += A[i*sz+j];
-			}
-		}			
-
-		double sum_slow_time = timer;
-
-		std::cout << "column sum times (slow/fast) in ns: " << sum_slow_time << ' ' << sum_fast_time << '\n';
-
+		// compute matrix-matrix multiplications
+		
 		std::unique_ptr<int[]> AB_fast{new int[sz*sz]()};
 		std::unique_ptr<int[]> AB_middle{new int[sz*sz]()};
 		std::unique_ptr<int[]> AB_slow{new int[sz*sz]()};
 
-		timer();
+		nano_timer timer;
 
 		for(size_t i=0; i < sz; ++i){
 			for(size_t j=0; j < sz; ++j){
