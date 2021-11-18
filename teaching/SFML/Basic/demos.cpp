@@ -235,11 +235,11 @@ int main() {
 			else if (event.type == sf::Event::Closed) {
 				window.close();
 			}
-			window.clear();
-			window.draw(circ);
-			window.draw(msg);
-			window.display();
 		}
+		window.clear();
+		window.draw(circ);
+		window.draw(msg);
+		window.display();
 	}
 	return 0;
 }
