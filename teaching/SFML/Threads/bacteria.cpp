@@ -89,7 +89,7 @@ public:
 		return N;
 	}
 
-	Pop(int N0, double _delta, double _mu, const bool& _done) : N(N0), delta(_delta),
+	Pop(int N0, double _delta, double _mu, const std::atomic<bool>& _done) : N(N0), delta(_delta),
 		mu(_mu), done(_done) {
 		std::thread(&Pop::callback, this).detach(); // start evolving
 	}
@@ -108,7 +108,7 @@ int main() {
 	std::atomic<bool> done = false;
 
 	sf::RenderWindow window(sf::VideoMode(width, height), "Population");
-	Pop p{ N0, delta, mu, done }; // population initialization
+	Pop p{ N0, delta, mu, std::cref(done) }; // population initialization
   
 	while (window.isOpen()) { // user not closed yet
 		sf::Event e;
