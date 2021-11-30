@@ -4,6 +4,7 @@
 #include<random>
 #include<future>
 #include<numeric>
+#include<atomic>
 
 #include<SFML/Graphics.hpp>
 
@@ -12,7 +13,7 @@ private:
 	int N;
 	double delta, mu;
 	mutable std::mutex m;
-	const bool& done;
+	const std::atomic<bool>& done;
 
 	constexpr static std::chrono::seconds wait{ 2 };
 	constexpr static double dT = 1;
@@ -104,7 +105,7 @@ int main() {
 	constexpr float height = 200; // window height
 	constexpr float pop_init_width = 100; // width for initial population
 
-	bool done = false;
+	std::atomic<bool> done = false;
 
 	sf::RenderWindow window(sf::VideoMode(width, height), "Population");
 	Pop p{ N0, delta, mu, done }; // population initialization
