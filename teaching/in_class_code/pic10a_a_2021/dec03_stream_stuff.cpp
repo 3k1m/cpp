@@ -12,6 +12,9 @@ int main() {
 	std::set<std::string> s;
 	std::string temp;
 	std::ifstream fin("myfile.txt");
+	if(!fin){
+		return -1;
+	}
 	while (fin >> temp) {
 		std::cout << temp << '\n';
 		s.insert(temp);
