@@ -3,7 +3,7 @@
 of values with a corresponding mapped value
 @author Mike Lindstrom
 @version 1.0
-@date 2021
+@date Dec 2021
 @copyright under GNU Affero General Public License v3.0
 */
 
