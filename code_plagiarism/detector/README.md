@@ -21,7 +21,7 @@ By default (many customizations are possible), you will need the following:
 - 'exts.txt' (storing all relevant file extensions for code each on a new line), 
 - 'punct.txt' (storing each individual component of grammar for the language like ',', ';', ':', and possibly digits, too), 
 - 'keywords.txt' (storing all words that should be parsed by the program such as 'include', 'std', 'console', 'const', etc.),
-- 'comments.txt' (defining the start and end of comments on each line in the format [start][end] where 'start' denotes how a comment begins and 'end' denotes how it ends -- if 'end' is blank then 'start' must mean a single line comment)
+- 'comments.txt' (defining the start and end of comments on each line in the format [start][end] or [start] where 'start' denotes how a comment begins and 'end' denotes how it ends -- if a second item in square brackets is not included it must mean a single line comment)
 - 'quotes.txt' (listing the punctuation used in defining strings -- this will likely just be ', ", and possibly `)
 2. The exectuable, 'detector', stored in your current working directory
 3. A directory called 'Support' in that same directory. The 'Support' directory should have the three text files listed in (1). 
