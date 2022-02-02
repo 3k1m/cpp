@@ -120,7 +120,7 @@ namespace comp {
 	bool correct_ending(const std::string& test, const std::unordered_set< std::string>& ends) noexcept;
 
 	constexpr bool is_whitespace(char c) noexcept {
-		return (c == ' ') || (c == '\n') || (c == '\t');
+		return (c == ' ') || (c == '\n') || (c == '\t') || (c == '\r');
 	}
 
 }
