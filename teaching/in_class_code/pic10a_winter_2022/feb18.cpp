@@ -1,4 +1,4 @@
-// part 1 of our SIS class
+// part 2 of our SIS class
 
 #include <iostream>
 #include <cmath>
