@@ -5,6 +5,7 @@ Linux C++ Program Runner
 ## Overview
 
 This program can be used on a Linux OS to compile and run a collection of C++ source files stored in separate directories. Overall, it:
+
 (1) Takes common files (such as a makefile, input files, provided source files) and places them into each separate submission directory, possibly overwriting the files 
 
 (2) Compiles each program based on the makefile, storing the compilation results in a file "compiler_output.txt" 
