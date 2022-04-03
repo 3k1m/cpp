@@ -5,12 +5,19 @@
 ## Overview
 
 This code plagiarism detector can work across multiple programming languages. Based on user choices or defaults, the program does the following: 
+
 (1) identify all pairs of directories; 
+
 (2) identifies all suitable files (based on file extension) within those separate directories to compare against the files within all other directories; 
+
 (3) between each pair of directories, all files are compared against each other by each file being tokenized by encoding specially chosen keywords and elements of the language grammar (while ignoring all comments and content within strings);
+
 (4) files are matched to their best matching file in each directory against which they are compared and the directories themselves are scored for similarity;
+
 (5) the distribution of similarity scores is shown and the directories whose similarity matches a sufficient threshold are displayed with their best matching files listed and the regions of overlap displayed.
+
 NOTE 1: this should work across many different programming languages as the format of comments, quotations, keywords, and file extensions are customizable.
+
 NOTE 2: the user can control many features of the program including where the document directories for comparison are stored; where the support files specifying keywords, syntax, etc., are stored; the threshold at which directories should be displayed; the sensitivity of overlap patch for identical content to be deemed significant; the destination of where results should be written to; the similarity scoring mechansism between documents with overlap based on the longest common sequence, longest common subsequence, or longest common sequences split in a greedy fashion without overlap in either document; the ordering of displayed results (increasing or decreasing similarity); the choice of filler for words that are not tokenized; and whether directory similarities are based on the mean or maximum of their corresponding file pairings
 
 ## How to run
