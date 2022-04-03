@@ -1,4 +1,4 @@
-#Code Plagiairm Detector 
+Code Plagiairm Detector 
 
 (c) Mike Lindstrom 2021 under GNU Affero General Public License v3.0
 
