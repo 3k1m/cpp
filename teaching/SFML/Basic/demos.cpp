@@ -475,7 +475,7 @@ std::string read_file(std::string fname, const size_t max_width) {
 	std::string res;
 	char c;
 	size_t col = 0;
-	while (!fin.eof()) {
+	while (fin.peek() != EOF) {
 		c = fin.get();
 		if (c == '\n') {
 			col = 0;
