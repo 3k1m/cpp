@@ -5,6 +5,7 @@
 #include<future>
 #include<numeric>
 #include<atomic>
+#include<iostream>
 
 #include<SFML/Graphics.hpp>
 
@@ -128,6 +129,7 @@ int main() {
 		window.display();
 	}
 	done = false; // can stop evolving the population
+	std::cout << "Simulation Terminated\n";
   
 	return 0;
 }
