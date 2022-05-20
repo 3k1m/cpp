@@ -9,7 +9,7 @@
 template<typename C>
 class rev{
   // Iter will be a reverse iterator
-  using Iter = decltype( std::rbegin(std::declval<C>()) );
+  using Iter = decltype( std::rbegin(std::declval<C&>()) );
   
   // should either be a moved version or reference to container 
   C _c;
