@@ -1,6 +1,7 @@
 #include<iostream>
 #include<string>
 #include<sstream>
+#include<limits>
 
 #ifndef _NICE__HELPFUL_HEADER
 #define _NICE__HELPFUL_HEADER
@@ -34,6 +35,7 @@ namespace nice{
   	*/
 	set_vars_cin(auto&&... vals){
 		(std::cin >> ... >> vals);
+		std::cin.ignore( std::numeric_limits<std::streamsize>::max(), '\n');
  	}
 
 	/**
