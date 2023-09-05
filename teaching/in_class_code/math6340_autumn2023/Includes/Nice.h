@@ -8,18 +8,18 @@
 namespace nice{
 
 	/**
-	PrintRaw will print whatever it is given, with no fancy formatting 
+	print_raw will print whatever it is given, with no fancy formatting 
 	@param ... params all the values to print 
 	*/
-	void PrintRaw(auto&& ... params){
+	void print_raw(auto&& ... params){
 		(std::cout << ... << std::forward<decltype(params)>(params));
 	}
 
 	/**
-	PrintNice will print whatever it is given with spaces between entries and a new line at the end 
+	print will print whatever it is given with spaces between entries and a new line at the end 
 	@param ... params all the values to print 
 	*/
-	void PrintNice(auto&& ... params){
+	void print(auto&& ... params){
 		auto print_w_space = [](std::ostream& o, auto&& val) {
 			o << std::forward<decltype(val)>(val) << ' ';
 		};
@@ -29,11 +29,11 @@ namespace nice{
 
 
 	/**
-	ReadString will read values stored in a string into a list of values 
+	read_from_string will read values stored in a string into a list of values 
 	@param str the string 
 	@param ... vals the values to set 
 	*/
-	void ReadString(const std::string& str, auto& ... vals){
+	void read_from_string(const std::string& str, auto& ... vals){
 		std::istringstream in{str};
 		(in >> ... >> vals);
 	}
