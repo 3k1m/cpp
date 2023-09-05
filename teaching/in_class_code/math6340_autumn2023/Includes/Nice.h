@@ -27,6 +27,14 @@ namespace nice{
 		std::cout << '\n';
 	}
 
+	/**
+ 	set_vars will parse a sequence of values, separated by spaces, given by the user
+  	and use them to set variables
+   	@param ... vals the values to set
+  	*/
+	set_vars_cin(auto&&... vals){
+		(std::cin >> ... >> vals);
+ 	}
 
 	/**
 	read_from_string will read values stored in a string into a list of values 
