@@ -33,7 +33,7 @@ namespace nice{
   	and use them to set variables
    	@param ... vals the values to set
   	*/
-	set_vars_cin(auto&&... vals){
+	void set_vars_cin(auto&&... vals){
 		(std::cin >> ... >> vals);
 		std::cin.ignore( std::numeric_limits<std::streamsize>::max(), '\n');
  	}
