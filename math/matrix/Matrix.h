@@ -1,8 +1,8 @@
 /**
 @file Matrix.h
 @author Mike Lindstrom
-@date Jan 2019
-@version 3
+@date Apr 2024
+@version 4
 
 @brief This gives a very simple implementation of a matrix class.
 
@@ -756,19 +756,19 @@ namespace basic_math {
 	// plain operator+
 	template<typename D>
 	matrix<D> operator+(matrix<D> left, const matrix<D>& right) { // left by value, right ref to const
-		return left += right; // define + by +=
+		return std::move(left += right); // define + by +=
 	}
 
 	// plain operator-
 	template<typename D>
 	matrix<D> operator-(matrix<D> left, const matrix<D>& right) { // left by value, right ref to const
-		return left -= right; // define - by -=
+		return std::move(left -= right); // define - by -=
 	}
 
 	// plain operator%
 	template<typename D>
 	matrix<D> operator%(matrix<D> left, const matrix<D>& right) {
-		return left %= right; // defined by %=
+		return std::move(left %= right); // defined by %=
 	}
 
 	template<typename D>
@@ -796,7 +796,7 @@ namespace basic_math {
 	// times operator
 	template<typename D>
 	matrix<D> operator*(matrix<D> left, const matrix<D>& right) {
-		return left *= right; // use *= to define *
+		return std::move(left *= right); // use *= to define *
 	}
 
 	/**
@@ -809,7 +809,7 @@ namespace basic_math {
 	*/
 	template<typename S, typename D>
 	matrix<D> operator*(const S& _scalar, matrix<D> _mat) {
-		return _mat *= static_cast<D>(_scalar);
+		return std::move(_mat *= static_cast<D>(_scalar));
 	}
 
 	/**
@@ -822,7 +822,7 @@ namespace basic_math {
 	*/
 	template<typename D, typename S>
 	matrix<D> operator*(matrix<D> _mat, const S& _scalar) {
-		return _mat *= static_cast<D>(_scalar);
+		return std::move( _mat *= static_cast<D>(_scalar) );
 	}
 
 	/**
@@ -835,7 +835,7 @@ namespace basic_math {
 	*/
 	template<typename D, typename S>
 	matrix<D> operator/(matrix<D> mat, const S& scalar) {
-		return mat *= (1 / static_cast<D>(scalar));
+		return std::move( mat *= (1 / static_cast<D>(scalar)) );
 	}
 
 	// lengthy inverse computation
