@@ -25,6 +25,28 @@ follows the naive direct approach.
 // within the basic_math namespace, we define the matrix class
 namespace basic_math {
 
+	namespace {
+		template<typename D = double>
+		struct allocator {
+			D* allocate(size_t N) const {
+				return static_cast<D*>(operator new(N * sizeof(D)));
+			}
+
+			template<typename ... Types>
+			void construct(D* p, Types&& ... vals)  const {
+				new (p) D(std::forward<Types>(vals)...);
+			}
+
+			void destroy(D* p) const {
+				p->~D();
+			}
+
+			void deallocate(D* p) const {
+				operator delete(p);
+			}
+		};
+	}
+
 	/**
 	@class matrix defines a rudimentary matrix class with a few
 	key operations
@@ -39,7 +61,7 @@ namespace basic_math {
 		static constexpr int width = 6; // width of each entry (unless entry is too wide)
 		size_t rows, cols; // its number of rows and columns
 		D* values; // all of our data is layed out contiguously
-		std::allocator<D> data_alloc; // allocator for data		
+		allocator<D> data_alloc; // allocator for data		
 
 									  /**
 									  Helper function to get index of an entry given row and col
@@ -48,7 +70,7 @@ namespace basic_math {
 									  @return the index from 0, counting left to right then top to bottom
 									  */
 		size_t entry_index(const size_t row, const size_t col) const {
-			return row*cols + col;
+			return row * cols + col;
 		}
 
 		/**
@@ -77,7 +99,7 @@ namespace basic_math {
 		*/
 		template<typename op, typename = typename std::enable_if< std::is_function<op>::value >>
 		void update(const matrix& right, const op& operation) {
-			const size_t entries = rows*cols;
+			const size_t entries = rows * cols;
 			for (size_t i = 0; i < entries; ++i) { // go through all elements and to this
 				values[i] = operation(values[i], right.values[i]);
 			}
@@ -142,12 +164,12 @@ namespace basic_math {
 		/**
 		size function returns the size of a matrix either number of
 		rows or number of columns - 1 indicates number of rows, 2 indicates number of columns
-		@param i whether row number (i==1) or col number (i==2)
+		@param i whether row number (i==0) or col number (i==1)
 		@return the dimension
 		*/
 		size_t size(const size_t i) const {
-			return (0 < i && i < 3) ?
-				((i == 1) ? rows : cols) : throw std::logic_error("improper size parameter");
+			return (0 <= i && i < 2) ?
+				((i == 0) ? rows : cols) : throw std::logic_error("improper size parameter");
 		}
 
 
@@ -307,8 +329,36 @@ namespace basic_math {
 			}
 
 			// call the update function with *
-			update(right, [](value_type x, value_type y)->value_type { return x*y; });
+			update(right, [](value_type x, value_type y)->value_type { return x * y; });
 
+			return *this;
+		}
+
+		/**
+		elementwise add scalar
+		@param _scalar scalar on the right
+		@return the right values added to all of the left, returned as reference to left
+		*/
+		matrix& operator+=(const value_type& _scalar) {
+			for (size_t i = 0; i < rows; ++i) { // for each row
+				for (size_t j = 0; j < cols; ++j) {  // and column
+					(*this)(i, j) += _scalar; // update the value
+				}
+			}
+			return *this;
+		}
+
+		/**
+		elementwise subtract scalar
+		@param _scalar scalar on the right
+		@return the right values subtracted from to all of the left, returned as reference to left
+		*/
+		matrix& operator-=(const value_type& _scalar) {
+			for (size_t i = 0; i < rows; ++i) { // for each row
+				for (size_t j = 0; j < cols; ++j) {  // and column
+					(*this)(i, j) -= _scalar; // update the value
+				}
+			}
 			return *this;
 		}
 
@@ -337,13 +387,13 @@ namespace basic_math {
 		return a copy with +
 		@return a copy
 		*/
-		matrix operator+() const { return *this; }
+		[[nodiscard]] matrix operator+() const { return *this; }
 
 		/**
 		return a negated copy with -
 		@return the negative
 		*/
-		matrix operator-() const {
+		[[nodiscard]] matrix operator-() const {
 			matrix negated(rows, cols); // start at all 0's
 			return negated -= *this; // subtract off this matrix
 		}
@@ -369,12 +419,20 @@ namespace basic_math {
 	};
 
 	/**
+	deduction guide for matrix, always deduct to default type
+	@tparam ... Types the types used
+	@param ... vals the arguments
+	*/
+	template<typename ... Types>
+	matrix(Types&& ... vals)->matrix<>;
+
+	/**
 	computes matrix inverse: very costly operation, beware!
 	@param X the matrix to invert
 	@return its inverse, or throws an exception if there is no inverse
 	*/
 	template<typename D>
-	matrix<D> inverse(matrix<D> X);
+	[[nodiscard]] matrix<D> inverse(matrix<D> X);
 
 	/**
 	operator+ to add two matrices
@@ -384,7 +442,7 @@ namespace basic_math {
 	@return their sum
 	*/
 	template<typename D>
-	matrix<D> operator+(matrix<D> left, const matrix<D>& right);
+	[[nodiscard]] matrix<D> operator+(matrix<D> left, const matrix<D>& right);
 
 	/**
 	operator- to subtract two matrices
@@ -394,7 +452,7 @@ namespace basic_math {
 	@return their difference
 	*/
 	template<typename D>
-	matrix<D> operator-(matrix<D> left, const matrix<D>& right);
+	[[nodiscard]] matrix<D> operator-(matrix<D> left, const matrix<D>& right);
 
 	/**
 	regular matrix multiplication provided the inner dimensions agree
@@ -404,7 +462,7 @@ namespace basic_math {
 	@return their product
 	*/
 	template<typename D>
-	matrix<D> operator*(matrix<D> left, const matrix<D>& right);
+	[[nodiscard]] matrix<D> operator*(matrix<D> left, const matrix<D>& right);
 
 	/**
 	matrix elementwise multiplication when dimensions directly match
@@ -413,7 +471,25 @@ namespace basic_math {
 	@return the elementwise multiplication
 	*/
 	template<typename D>
-	matrix<D> operator%(matrix<D> left, const matrix<D>& right);
+	[[nodiscard]] matrix<D> operator%(matrix<D> left, const matrix<D>& right);
+
+	/**
+	to perform an operation on each element of a matrix
+	@tparam Functor the type of functor to use
+	@tparam D the type of matrix data
+	@param f the function
+	@param m the matrix
+	@return a matrix from f acting on each element of M
+	*/
+	template<typename Functor, typename D>
+	[[nodiscard]] matrix<D> apply_to(Functor f, matrix<D> m) {
+		for (size_t i = 0, rows = m.size(0); i < rows; ++i) {
+			for (size_t j = 0, cols = m.size(1); j < cols; ++j) {
+				m(i, j) = f(m(i, j));
+			}
+		}
+		return m;
+	}
 
 	/**
 	to multiply a column with a row
@@ -423,8 +499,10 @@ namespace basic_math {
 	@return the resulting matrix
 	*/
 	template<typename D>
-	matrix<D> col_times_row(const typename matrix<D>::const_column& _col,
+	[[nodiscard]] matrix<D> col_times_row(const typename matrix<D>::const_column& _col,
 		const typename matrix<D>::const_row& _row);
+
+
 
 	/**
 	a utility function to make an identity matrix
@@ -432,7 +510,7 @@ namespace basic_math {
 	@param dim the dimension
 	*/
 	template<typename D>
-	matrix<D> make_identity(const size_t dim) {
+	[[nodiscard]] matrix<D> make_identity(const size_t dim) {
 		matrix<D> id(dim, dim);
 		for (size_t i = 0; i < dim; ++i) { // place 1's on diagonal
 			id(i, i) = 1;
@@ -456,6 +534,95 @@ namespace basic_math {
 	template<typename D>
 	void make_diagonal(matrix<D>& X, matrix<D>& Xinv);
 
+	/**
+	to add scalar to matrix
+	@tparam S the type of the scalar
+	@tparam D the type of data in the matrix
+	@param _mat the matrix to add to
+	@param _scalar the scalar value
+	@return the matrix plus the scalar
+	*/
+	template<typename S, typename D>
+	[[nodiscard]] matrix<D> operator+(const S& _scalar, matrix<D> _mat);
+
+	/**
+	to add scalar to matrix
+	@tparam D the type of data in the matrix
+	@tparam S the type of the scalar
+	@param _mat the matrix to add to
+	@param _scalar the scalar value
+	@return the matrix plus the scalar
+	*/
+	template<typename D, typename S>
+	[[nodiscard]] matrix<D> operator+(matrix<D> _mat, const S& _scalar);
+
+
+	/**
+	to subtract matrix from scalar elementwise
+	@tparam S the type of the scalar
+	@tparam D the type of data in the matrix
+	@param _mat the matrix being subtracted elementwise
+	@param _scalar the scalar value
+	@return the scalar minus matrix elementwise
+	*/
+	template<typename S, typename D>
+	[[nodiscard]] matrix<D> operator-(const S& _scalar, matrix<D> _mat);
+
+	/**
+	to subtract scalar from matrix elementwise
+	@tparam D the type of data in the matrix
+	@tparam S the type of the scalar
+	@param _mat the matrix to add to
+	@param _scalar the scalar value
+	@return the matrix minus the scalar elementwise
+	*/
+	template<typename D, typename S>
+	[[nodiscard]] matrix<D> operator-(matrix<D> _mat, const S& _scalar);
+
+
+	/**
+	to multiply a matrix by a scalar
+	@tparam S the type of the scalar
+	@tparam D the type of data in the matrix
+	@param _mat the matrix to multiply
+	@param _scalar the scalar value
+	@return the matrix times the scalar
+	*/
+	template<typename S, typename D>
+	[[nodiscard]] matrix<D> operator*(const S& _scalar, matrix<D> _mat);
+
+	/**
+	to multiply a matrix by a scalar
+	@tparam S the type of the scalar
+	@tparam D the type of data in the matrix
+	@param _mat the matrix to multiply
+	@param _scalar the scalar value
+	@return the matrix times the scalar
+	*/
+	template<typename D, typename S>
+	[[nodiscard]] matrix<D> operator*(matrix<D> _mat, const S& _scalar);
+
+	/**
+	to divide a matrix by a scalar value
+	@tparam D the data type of the matrix
+	@tparam S the data type of the scalar to be turned into T
+	@param mat the matrix
+	@param scalar the scalar value
+	@return the matrix divided by the scalar
+	*/
+	template<typename D, typename S>
+	[[nodiscard]] matrix<D> operator/(matrix<D> mat, const S& scalar);
+
+	/**
+	to divide a scalar by matrix elementwise
+	@tparam S the data type of the scalar to be turned into T
+	@tparam D the data type of the matrix
+	@param scalar the scalar value
+	@param mat the matrix
+	@return the matrix divided by the scalar
+	*/
+	template<typename S, typename D>
+	[[nodiscard]] matrix<D> operator/(const S& scalar, matrix<D> mat);
 
 
 	/* DEFINITIONS */
@@ -465,7 +632,7 @@ namespace basic_math {
 	template<typename D>
 	matrix<D>::matrix(const size_t _rows, const size_t _cols) : rows(_rows), cols(_cols), values(nullptr) { // start as null
 
-		const size_t entries = rows*cols;
+		const size_t entries = rows * cols;
 
 		values = data_alloc.allocate(entries); // allocate space for all entries
 
@@ -488,7 +655,7 @@ namespace basic_math {
 	template<typename D>
 	matrix<D>::matrix(const std::initializer_list< std::initializer_list<D> >& input) : rows(input.size()),
 		cols(input.begin()->size()), values(nullptr) { // start as null
-		const size_t entries = rows*cols;
+		const size_t entries = rows * cols;
 
 		auto row_list_iter = input.begin(); // iterator starts at first initializer list
 
@@ -526,12 +693,12 @@ namespace basic_math {
 	  // copy constructor
 	template<typename D>
 	matrix<D>::matrix(const matrix& other) : rows(other.rows), cols(other.cols), values(nullptr) { // start as null
-		const size_t entries = rows*cols;
+		const size_t entries = rows * cols;
 
 		values = data_alloc.allocate(entries); // allocate space for rows
 
 											   // copy into values space from other, need to tract sizeof the data type and number of entries for bytes moved
-		std::memcpy(values, other.values, sizeof(value_type)*entries);
+		std::memcpy(values, other.values, sizeof(value_type) * entries);
 
 	} // end copy body
 
@@ -542,13 +709,13 @@ namespace basic_math {
 			return;
 		}
 		else { // assuming not null, clean up
-			const size_t entries = rows*cols;
+			const size_t entries = rows * cols;
 
 			for (size_t i = 0; i < entries; ++i) { // go through all entries and destroy
 				data_alloc.destroy(values + i);
 			}
 
-			data_alloc.deallocate(values, entries);
+			data_alloc.deallocate(values);
 
 			values = nullptr;
 		}
@@ -721,31 +888,31 @@ namespace basic_math {
 
 	template<typename D>
 	typename matrix<D>::const_row matrix<D>::operator[](const size_t i) const {
-		return (i<rows) ? const_row(i, this) : throw std::logic_error("index past rows"); // make a row of the data
+		return (i < rows) ? const_row(i, this) : throw std::logic_error("index past rows"); // make a row of the data
 	}
 
 	template<typename D>
 	typename matrix<D>::row matrix<D>::operator[](const size_t i) {
-		return (i<rows) ? row(i, this) : throw std::logic_error("index past rows"); // make a row of the data
+		return (i < rows) ? row(i, this) : throw std::logic_error("index past rows"); // make a row of the data
 	}
 
 	template<typename D>
 	typename matrix<D>::const_column matrix<D>::get_col(const size_t i) const {
-		return (i<cols) ? const_column(i, this) : throw std::logic_error("index past columns"); // make a row of the data
+		return (i < cols) ? const_column(i, this) : throw std::logic_error("index past columns"); // make a row of the data
 	}
 
 	template<typename D>
 	typename matrix<D>::column matrix<D>::get_col(const size_t i) {
-		return (i<cols) ? column(i, this) : throw std::logic_error("index past columns"); // make a row of the data
+		return (i < cols) ? column(i, this) : throw std::logic_error("index past columns"); // make a row of the data
 	}
 
 	// outer product
 
 	template<typename D>
 	matrix<D> col_times_row(const typename matrix<D>::const_column& _col, const typename matrix<D>::const_row& _row) {
-		matrix<D> res(_col.owner->size(1), _row.owner->size(2)); // the resulting matrix
-		for (size_t i = 0, col_height = res.size(1); i < col_height; ++i) { // loop over the entries of _col
-			for (size_t j = 0, row_width = res.size(2); j < row_width; ++j) { // and the entries of _row
+		matrix<D> res(_col.owner->size(0), _row.owner->size(1)); // the resulting matrix
+		for (size_t i = 0, col_height = res.size(0); i < col_height; ++i) { // loop over the entries of _col
+			for (size_t j = 0, row_width = res.size(1); j < row_width; ++j) { // and the entries of _row
 				res(i, j) = _col[i] * _row[j]; // multiply to generate the rank 1 outer product
 			}
 		}
@@ -773,18 +940,18 @@ namespace basic_math {
 
 	template<typename D>
 	matrix<D>& matrix<D>::operator*=(const matrix& right) {
-		if (size(2) != right.size(1)) { // if inner dimension mismatch
+		if (size(1) != right.size(0)) { // if inner dimension mismatch
 			throw std::logic_error("inner matrix dimensions must agree");
 		}
 
-		size_t num_rows = size(1);
-		size_t num_cols = right.size(2);
+		size_t num_rows = size(0);
+		size_t num_cols = right.size(1);
 
 		matrix product(num_rows, num_cols);
 
-		for (size_t i = 0, num_rows = size(1); i < num_rows; ++i) { // set ith row of product
-			for (size_t j = 0, right_cols = right.size(2); j < right_cols; ++j) { // and jth column of product
-				for (size_t k = 0, inner_dim = size(2); k < inner_dim; ++k) { // loop over their inner parts
+		for (size_t i = 0, num_rows = size(0); i < num_rows; ++i) { // set ith row of product
+			for (size_t j = 0, right_cols = right.size(1); j < right_cols; ++j) { // and jth column of product
+				for (size_t k = 0, inner_dim = size(1); k < inner_dim; ++k) { // loop over their inner parts
 					product(i, j) += (*this)(i, k) * right(k, j);
 				}
 			}
@@ -799,51 +966,61 @@ namespace basic_math {
 		return std::move(left *= right); // use *= to define *
 	}
 
-	/**
-	to multiply a matrix by a scalar
-	@tparam S the type of the scalar
-	@tparam D the type of data in the matrix
-	@param _mat the matrix to multiply
-	@param _scalar the scalar value
-	@return the matrix times the scalar
-	*/
+
+	template<typename S, typename D>
+	matrix<D> operator+(const S& _scalar, matrix<D> _mat) {
+		return std::move(_mat += static_cast<D>(_scalar));
+	}
+
+	template<typename D, typename S>
+	matrix<D> operator+(matrix<D> _mat, const S& _scalar) {
+		return std::move(_mat += static_cast<D>(_scalar));
+	}
+
+
+	template<typename S, typename D>
+	matrix<D> operator-(const S& _scalar, matrix<D> _mat) {
+		return -(_mat -= static_cast<D>(_scalar));
+	}
+
+	template<typename D, typename S>
+	matrix<D> operator-(matrix<D> _mat, const S& _scalar) {
+		return std::move(_mat += static_cast<D>(-_scalar));
+	}
+
+
 	template<typename S, typename D>
 	matrix<D> operator*(const S& _scalar, matrix<D> _mat) {
 		return std::move(_mat *= static_cast<D>(_scalar));
 	}
 
-	/**
-	to multiply a matrix by a scalar
-	@tparam S the type of the scalar
-	@tparam D the type of data in the matrix
-	@param _mat the matrix to multiply
-	@param _scalar the scalar value
-	@return the matrix times the scalar
-	*/
+
 	template<typename D, typename S>
 	matrix<D> operator*(matrix<D> _mat, const S& _scalar) {
-		return std::move( _mat *= static_cast<D>(_scalar) );
+		return std::move(_mat *= static_cast<D>(_scalar));
 	}
 
-	/**
-	to divide a matrix by a scalar value
-	@tparam D the data type of the matrix
-	@tparam S the data type of the scalar to be turned into T
-	@param mat the matrix
-	@param scalar the scalar value
-	@return the matrix divided by the scalar
-	*/
 	template<typename D, typename S>
 	matrix<D> operator/(matrix<D> mat, const S& scalar) {
-		return std::move( mat *= (1 / static_cast<D>(scalar)) );
+		return std::move(mat *= (1 / static_cast<D>(scalar)));
+	}
+
+	template<typename S, typename D>
+	matrix<D> operator/(const S& scalar, matrix<D> mat) {
+		for (size_t i = 0, rows = mat.size(0); i < rows; ++i) {
+			for (size_t j = 0, cols = mat.size(1); j < cols; ++j) {
+				mat(i, j) = scalar / mat(i, j);
+			}
+		}
+		return mat;
 	}
 
 	// lengthy inverse computation
 	template<typename D>
 	matrix<D> inverse(matrix<D> X) {
 
-		const size_t rows = X.size(1);
-		const size_t cols = X.size(2);
+		const size_t rows = X.size(0);
+		const size_t cols = X.size(1);
 
 		if ((rows != cols) || rows == 0 || cols == 0) { // ensure matrix has a positive size and is square
 			throw std::logic_error("matrix is not square");
@@ -875,8 +1052,8 @@ namespace basic_math {
 	void make_lower(matrix<D>& X, matrix<D>& Xinv) {
 		using std::swap;
 
-		const size_t rows = X.size(1);
-		const size_t cols = X.size(2);
+		const size_t rows = X.size(0);
+		const size_t cols = X.size(1);
 
 		size_t curr = cols - 1; // current column we are working on, start with last
 
@@ -904,8 +1081,8 @@ namespace basic_math {
 			for (; row != static_cast<size_t>(-1); --row) { // move up from row above curr
 				D factor = X(row, curr) / X(curr, curr);
 				for (size_t col = 0; col < cols; ++col) { // column by column do the operation
-					X(row, col) -= factor*X(curr, col);
-					Xinv(row, col) -= factor*Xinv(curr, col);
+					X(row, col) -= factor * X(curr, col);
+					Xinv(row, col) -= factor * Xinv(curr, col);
 				}
 			}
 
@@ -917,8 +1094,8 @@ namespace basic_math {
 	void make_diagonal(matrix<D>& X, matrix<D>& Xinv) {
 		using std::swap;
 
-		const size_t rows = X.size(1);
-		const size_t cols = X.size(2);
+		const size_t rows = X.size(0);
+		const size_t cols = X.size(1);
 
 		// now we have a lower triangular matrix X and we solve via forward substitution
 		size_t curr = 0; // start at left column
@@ -927,9 +1104,9 @@ namespace basic_math {
 			size_t row = curr + 1; // row we need to clear
 			for (; row <= rows - 1; ++row) {
 				D factor = X(row, curr) / X(curr, curr);
-				X(row, curr) -= factor*X(curr, curr);
+				X(row, curr) -= factor * X(curr, curr);
 				for (size_t col = 0; col < cols; ++col) { // update all entries in the given row					
-					Xinv(row, col) -= factor*Xinv(curr, col);
+					Xinv(row, col) -= factor * Xinv(curr, col);
 				}
 			}
 			++curr; // move to next column
