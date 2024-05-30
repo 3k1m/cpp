@@ -1,8 +1,8 @@
 /**
 @file Matrix.h
 @author Mike Lindstrom
-@date Apr 2024
-@version 4
+@date May 2024
+@version 5
 
 @brief This gives a very simple implementation of a matrix class.
 
@@ -21,12 +21,16 @@ follows the naive direct approach.
 #include<stdexcept>
 #include<memory>
 #include<cstring>
+#include<concepts>
 
 // within the basic_math namespace, we define the matrix class
 namespace basic_math {
 
 	namespace {
-		template<typename D = double>
+
+		// allocator class for internal purposes only
+
+		template<typename D>
 		struct allocator {
 			D* allocate(size_t N) const {
 				return static_cast<D*>(operator new(N * sizeof(D)));
@@ -105,6 +109,33 @@ namespace basic_math {
 			}
 		}
 
+		/**
+		Helper function removes the row i and col j from matrix
+		@param i the row to remove
+		@param j the col to remove
+		@return a matrix without row i and col j
+		*/
+		[[nodiscard]] matrix without(size_t i, size_t j) const {
+			matrix ret(rows - 1, cols - 1);
+			for (size_t p = 0; p < i; ++p) { // top
+				for (size_t q = 0; q < j; ++q) { // and left
+					ret(p, q) = operator()(p, q);
+				}
+				for (size_t q = j+1; q < cols; ++q) { // and right
+					ret(p, q-1) = operator()(p, q);
+				}
+			}
+			for (size_t p = i+1; p < rows; ++p) { // bottom
+				for (size_t q = 0; q < j; ++q) { // and left
+					ret(p-1, q) = operator()(p, q);
+				}
+				for (size_t q = j + 1; q < cols; ++q) { // and right
+					ret(p-1, q - 1) = operator()(p, q);
+				}
+			}
+			return ret;
+		}
+
 	public:
 
 		/**
@@ -167,17 +198,16 @@ namespace basic_math {
 		@param i whether row number (i==0) or col number (i==1)
 		@return the dimension
 		*/
-		size_t size(const size_t i) const {
+		[[nodiscard]] size_t size(const size_t i) const {
 			return (0 <= i && i < 2) ?
 				((i == 0) ? rows : cols) : throw std::logic_error("improper size parameter");
 		}
-
 
 		/**
 		transpose operator makes the transpose
 		@return the matrix transpose so the (ij) entry of the transpose is the (ji) entry of the original
 		*/
-		matrix T() const {
+		[[nodiscard]] matrix T() const {
 			matrix transpose(cols, rows);
 			for (size_t i = 0; i < rows; ++i) { // for each row of original
 				for (size_t j = 0; j < cols; ++j) { // for each column of original
@@ -185,6 +215,21 @@ namespace basic_math {
 				}
 			}
 			return transpose;
+		}
+
+		/**
+		trace operator
+		@return the trace of the matrix
+		*/
+		[[nodiscard]] value_type tr() const {
+			if (rows != cols) [[unlikely]] { // invalid
+				throw std::logic_error("cannot compute trace of non-square matrix");
+			}
+			value_type tot{};
+			for (size_t i = 0; i < rows; ++i) { // add along diagonal
+				tot += operator()(i, i);
+			}
+			return tot;
 		}
 
 		/**
@@ -198,6 +243,98 @@ namespace basic_math {
 			else { // but if not a scalar this makes no sense!
 				throw std::logic_error("cannot convert matrix");
 			}
+		}
+
+		/**
+		Get the diagonal of a matrix
+		@param col whether to return as column vector (otherwise row vector),
+		default is true
+		@return the diagonal as a column vector
+		*/
+		[[nodiscard]] matrix diag(bool col=true) const {
+			if (rows != cols) { // invalid
+				throw std::logic_error("cannot compute diagonal of non-square matrix");
+			}
+			if (col) [[likely]] { // get a column
+				matrix d(rows, 1);
+				for (size_t i = 0; i < rows; ++i) { // set values
+					d(i, 0) = operator()(i, i);
+				}
+				return d;
+			}
+			else { // get a row
+				matrix d(1, rows);
+				for (size_t i = 0; i < rows; ++i) { // set values
+					d(0, i) = operator()(i, i);
+				}
+				return d;
+			}
+		}
+
+		/**
+		select a submatrix
+		@param row_low the lower row index to start at
+		@param row_up the past-the-end row index
+		@param row_stride the stride width for rows 
+		@param col_low the lower col index to start at 
+		@param col_up the past-the-end column index 
+		@param col_stride the stride width for columns 
+		@return a submatrix: indexing past the edges will not happen
+		*/
+		[[nodiscard]] matrix<D> select(size_t row_low, size_t row_up, size_t row_stride,
+			size_t col_low, size_t col_up, size_t col_stride) const {
+
+			// no stride width or bad order
+			if (row_low > row_up || col_low > col_up || row_stride == 0 || col_stride == 0) { 
+				throw std::logic_error("bad selection");
+			}
+
+			// empty selection get empty matrix
+			if (row_low == row_up || col_low == col_up) {
+				return {};
+			}
+
+			// row_up and col_up must both be > 0
+			// set bounds on what past-the-end means
+			const size_t max_row = (row_up > rows) ? rows : row_up;
+			const size_t max_col = (col_up > cols) ? cols : col_up;
+
+			// widest range is from row_low to max_row-1 inclusive
+			// add 1 in case round to 0
+			const size_t num_rows = 1+ (max_row-1 - row_low) / row_stride;
+			const size_t num_cols = 1+ (max_col-1 - col_low) / col_stride;
+
+			matrix<D> m(num_rows, num_cols);
+			for (size_t i = 0; i < num_rows; ++i) {
+				for (size_t j = 0; j < num_cols; ++j) {
+					m(i, j) = operator()(row_low + i * row_stride, col_low + j * col_stride);
+				}
+			}
+
+			return m;
+		}
+
+		/**
+		computes the determinant very inefficiently with Laplace expansion
+		@return the determinant
+		*/
+		[[nodiscard]] value_type det() const {
+			if (rows != cols) { // not square
+				throw std::logic_error("can only take determinant of square matrix");
+			}
+
+			if (rows == 1) { // base case
+				return operator()(0, 0);
+			}
+
+			// sign
+			int sgn = 1;
+			value_type tot{}; // start at 0
+			for (size_t i = 0; i < cols; ++i) { // run across row 0
+				tot += operator()(0,i) * without(0, i).det() * sgn;
+				sgn = -sgn;
+			}
+			return tot;
 		}
 
 
@@ -426,6 +563,7 @@ namespace basic_math {
 	template<typename ... Types>
 	matrix(Types&& ... vals)->matrix<>;
 
+	
 	/**
 	computes matrix inverse: very costly operation, beware!
 	@param X the matrix to invert
@@ -474,6 +612,25 @@ namespace basic_math {
 	[[nodiscard]] matrix<D> operator%(matrix<D> left, const matrix<D>& right);
 
 	/**
+	convert matrix(vector) to diagonal matrix
+	@tparam D the type of vector data
+	@param v the vector
+	@return a diagonal matrix from v
+	*/
+	template<typename D>
+	[[nodiscard]] matrix<D> diag(const matrix<D>& v);
+
+	/**
+	make a diagonal matrix with a repeated value
+	@tparam D the type of data
+	@param N the matrix size
+	@param v the value to repeat
+	@return a diagonal matrix with v along the diagonal
+	*/
+	template<typename D>
+	[[nodiscard]] matrix<D> diag(size_t N, D v);
+
+	/**
 	to perform an operation on each element of a matrix
 	@tparam Functor the type of functor to use
 	@tparam D the type of matrix data
@@ -482,14 +639,18 @@ namespace basic_math {
 	@return a matrix from f acting on each element of M
 	*/
 	template<typename Functor, typename D>
-	[[nodiscard]] matrix<D> apply_to(Functor f, matrix<D> m) {
-		for (size_t i = 0, rows = m.size(0); i < rows; ++i) {
-			for (size_t j = 0, cols = m.size(1); j < cols; ++j) {
-				m(i, j) = f(m(i, j));
-			}
-		}
-		return m;
-	}
+	[[nodiscard]] matrix<D> apply_to(Functor&& f, matrix<D> m);
+
+	/**
+	to perform an operation on each element of a matrix
+	@tparam Functor the type of functor to use
+	@tparam D the type of matrix data
+	@param f the function
+	@param m the matrix
+	@return a matrix from f acting on each element of M
+	*/
+	template<typename Functor, typename D>
+	[[nodiscard]] matrix<D> operator%(Functor&& f, matrix<D> m);
 
 	/**
 	to multiply a column with a row
@@ -518,21 +679,6 @@ namespace basic_math {
 		return id;
 	}
 
-	/**
-	function to make X lower triangular and update its inverse
-	@param X the matrix to invert
-	@param Xinv its inverse being computed
-	*/
-	template<typename D>
-	void make_lower(matrix<D>& X, matrix<D>& Xinv);
-
-	/**
-	function to make X diagonal and update its inverse
-	@param X the matrix to invert
-	@param Xinv its inverse being computed
-	*/
-	template<typename D>
-	void make_diagonal(matrix<D>& X, matrix<D>& Xinv);
 
 	/**
 	to add scalar to matrix
@@ -623,6 +769,18 @@ namespace basic_math {
 	*/
 	template<typename S, typename D>
 	[[nodiscard]] matrix<D> operator/(const S& scalar, matrix<D> mat);
+
+	/**
+	to make a linear space
+	@tparam D the type of data
+	@param low the lower bound
+	@param up the upper bound 
+	@param N the number of interval points
+	@param col whether to make a column vector, true by default 
+	@return vector with N points, uniformly spaced from low to up
+	*/
+	template<typename D>
+	[[nodiscard]] matrix<D> linspace(D low, D up, size_t N, bool col = true);
 
 
 	/* DEFINITIONS */
@@ -939,6 +1097,33 @@ namespace basic_math {
 	}
 
 	template<typename D>
+	matrix<D> diag(const matrix<D>& v) {
+		if (v.size(0) != 1 && v.size(1) != 1) { // not a vector
+			throw std::logic_error("require a vector with one dimension of 1 to make diagonal matrix");
+		}
+		if (v.size(0) == 1) { // a row vector
+			const size_t N = v.size(1);
+			matrix<D> d(N, N);
+			for (size_t i = 0; i < N; ++i) { // set values across the row
+				d(i, i) = v(0, i);
+			}
+			return d;
+		}
+		// must be a column vector
+		const size_t N = v.size(0); 
+		matrix<D> d(N, N);
+		for (size_t i = 0; i < N; ++i) { // set values down the column
+			d(i, i) = v(i,0);
+		}
+		return d;
+	}
+
+	template<typename D>
+	matrix<D> diag(size_t N, D v) {
+		return make_identity<D>(N) * v;
+	}
+
+	template<typename D>
 	matrix<D>& matrix<D>::operator*=(const matrix& right) {
 		if (size(1) != right.size(0)) { // if inner dimension mismatch
 			throw std::logic_error("inner matrix dimensions must agree");
@@ -1015,6 +1200,124 @@ namespace basic_math {
 		return mat;
 	}
 
+	template<typename D>
+	matrix<D> linspace(D low, D up, size_t N, bool col) {
+		auto dx = (up - low) / (N - 1);
+		if (col) { // column vector
+			matrix<D> m(N, 1);
+			for (size_t i = 0; i < N; ++i) { // uniform space
+				m(i, 0) = low + i * dx;
+			}
+			return m;
+		}
+		// row vector
+		matrix<D> m(1,N);
+		for (size_t i = 0; i < N; ++i) {
+			m(0,i) = low + i * dx;
+		}
+		return m;
+	}
+
+	template<typename Functor, typename D>
+	matrix<D> apply_to(Functor&& f, matrix<D> m) {
+		for (size_t i = 0, rows = m.size(0); i < rows; ++i) {
+			for (size_t j = 0, cols = m.size(1); j < cols; ++j) {
+				m(i, j) = f(m(i, j));
+			}
+		}
+		return m;
+	}
+
+	template<typename Functor, typename D>
+	matrix<D> operator%(Functor&& f, matrix<D> m) {
+		for (size_t i = 0, rows = m.size(0); i < rows; ++i) {
+			for (size_t j = 0, cols = m.size(1); j < cols; ++j) {
+				m(i, j) = f(m(i, j));
+			}
+		}
+		return m;
+	}
+
+	namespace {
+
+		/**
+		function to make X lower triangular and update its inverse
+		@param X the matrix to invert
+		@param Xinv its inverse being computed
+		*/
+
+		template<typename D>
+		void make_lower(matrix<D>& X, matrix<D>& Xinv) {
+			using std::swap;
+
+			const size_t rows = X.size(0);
+			const size_t cols = X.size(1);
+
+			size_t curr = cols - 1; // current column we are working on, start with last
+
+			while (curr > 0) { // while not made it to top row
+				if (X(curr, curr) == 0) { // no pivot to use 
+					size_t look = curr - 1; // where we look for a nonzero
+					for (; look != static_cast<size_t>(-1); --look) { // go looking for nonzero at higher rows
+						if (X(look, curr) != 0) { // break out we found our match
+							break;
+						}
+					}
+					if (look != static_cast<size_t>(-1)) { // then just need to swap two rows 
+						for (size_t col = 0; col < cols; ++col) { // column by column swap values
+							swap(X(look, col), X(curr, col));
+							swap(Xinv(look, col), Xinv(curr, col));
+						}
+					}
+					else { // all zeros then, bad
+						throw std::runtime_error("matrix is not invertible");
+					}
+				}
+
+				// now we have a safe pivot
+				size_t row = curr - 1;
+				for (; row != static_cast<size_t>(-1); --row) { // move up from row above curr
+					D factor = X(row, curr) / X(curr, curr);
+					for (size_t col = 0; col < cols; ++col) { // column by column do the operation
+						X(row, col) -= factor * X(curr, col);
+						Xinv(row, col) -= factor * Xinv(curr, col);
+					}
+				}
+
+				--curr; // move back a column
+			}
+		}
+
+		/**
+		function to make X diagonal and update its inverse
+		@param X the matrix to invert
+		@param Xinv its inverse being computed
+		*/
+		template<typename D>
+		void make_diagonal(matrix<D>& X, matrix<D>& Xinv) {
+			using std::swap;
+
+			const size_t rows = X.size(0);
+			const size_t cols = X.size(1);
+
+			// now we have a lower triangular matrix X and we solve via forward substitution
+			size_t curr = 0; // start at left column
+
+			while (curr < cols - 1) { // while not cleared all the columns
+				size_t row = curr + 1; // row we need to clear
+				for (; row <= rows - 1; ++row) {
+					D factor = X(row, curr) / X(curr, curr);
+					X(row, curr) -= factor * X(curr, curr);
+					for (size_t col = 0; col < cols; ++col) { // update all entries in the given row					
+						Xinv(row, col) -= factor * Xinv(curr, col);
+					}
+				}
+				++curr; // move to next column
+			}
+		}
+
+	}
+
 	// lengthy inverse computation
 	template<typename D>
 	matrix<D> inverse(matrix<D> X) {
@@ -1048,70 +1351,6 @@ namespace basic_math {
 	}
 
 
-	template<typename D>
-	void make_lower(matrix<D>& X, matrix<D>& Xinv) {
-		using std::swap;
-
-		const size_t rows = X.size(0);
-		const size_t cols = X.size(1);
-
-		size_t curr = cols - 1; // current column we are working on, start with last
-
-		while (curr > 0) { // while not made it to top row
-			if (X(curr, curr) == 0) { // no pivot to use 
-				size_t look = curr - 1; // where we look for a nonzero
-				for (; look != static_cast<size_t>(-1); --look) { // go looking for nonzero at higher rows
-					if (X(look, curr) != 0) { // break out we found our match
-						break;
-					}
-				}
-				if (look != static_cast<size_t>(-1)) { // then just need to swap two rows 
-					for (size_t col = 0; col < cols; ++col) { // column by column swap values
-						swap(X(look, col), X(curr, col));
-						swap(Xinv(look, col), Xinv(curr, col));
-					}
-				}
-				else { // all zeros then, bad
-					throw std::runtime_error("matrix is not invertible");
-				}
-			}
-
-			// now we have a safe pivot
-			size_t row = curr - 1;
-			for (; row != static_cast<size_t>(-1); --row) { // move up from row above curr
-				D factor = X(row, curr) / X(curr, curr);
-				for (size_t col = 0; col < cols; ++col) { // column by column do the operation
-					X(row, col) -= factor * X(curr, col);
-					Xinv(row, col) -= factor * Xinv(curr, col);
-				}
-			}
-
-			--curr; // move back a column
-		}
-	}
-
-	template<typename D>
-	void make_diagonal(matrix<D>& X, matrix<D>& Xinv) {
-		using std::swap;
-
-		const size_t rows = X.size(0);
-		const size_t cols = X.size(1);
-
-		// now we have a lower triangular matrix X and we solve via forward substitution
-		size_t curr = 0; // start at left column
-
-		while (curr < cols - 1) { // while not cleared all the columns
-			size_t row = curr + 1; // row we need to clear
-			for (; row <= rows - 1; ++row) {
-				D factor = X(row, curr) / X(curr, curr);
-				X(row, curr) -= factor * X(curr, curr);
-				for (size_t col = 0; col < cols; ++col) { // update all entries in the given row					
-					Xinv(row, col) -= factor * Xinv(curr, col);
-				}
-			}
-			++curr; // move to next column
-		}
-	}
 
 
 } // end namespace
