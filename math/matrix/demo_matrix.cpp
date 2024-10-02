@@ -52,6 +52,7 @@ int main() {
 	std::cout << "m.diag():\n" << m.diag() << '\n'; // diagonal as column, default
 	std::cout << "m.diag(true):\n" << m.diag(true) << '\n'; // diagonal as column
 	std::cout << "m.diag(false):\n" << m.diag(false) << '\n'; // diagonal as row
+	std::cout << "7x7 identity:\n" << math::make_identity<float>(7) << '\n'; // a 7x7 identity matrix of float
 
 	// check determinant
 	printline("m.det():\n",m.det());
