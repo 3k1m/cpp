@@ -26,31 +26,6 @@ follows the naive direct approach.
 // within the basic_math namespace, we define the matrix class
 namespace basic_math {
 
-	namespace {
-
-		// allocator class for internal purposes only
-
-		template<typename D>
-		struct allocator {
-			D* allocate(size_t N) const {
-				return static_cast<D*>(operator new(N * sizeof(D)));
-			}
-
-			template<typename ... Types>
-			void construct(D* p, Types&& ... vals)  const {
-				new (p) D(std::forward<Types>(vals)...);
-			}
-
-			void destroy(D* p) const {
-				p->~D();
-			}
-
-			void deallocate(D* p) const {
-				operator delete(p);
-			}
-		};
-	}
-
 	/**
 	@class matrix defines a rudimentary matrix class with a few
 	key operations
@@ -58,6 +33,31 @@ namespace basic_math {
 	*/
 	template<typename D = double>
 	class matrix {
+    
+    		// allocator class for internal purposes only
+
+		template<typename T>
+		struct allocator {
+			T* allocate(size_t N) const {
+				return static_cast<T*>(operator new(N * sizeof(T)));
+			}
+
+			template<typename ... Types>
+			void construct(T* p, Types&& ... vals)  const {
+				new (p) T(std::forward<Types>(vals)...);
+			}
+
+			void destroy(T* p) const {
+				p->~D();
+			}
+
+			void deallocate(T* p) const {
+				operator delete(p);
+			}
+		};
+    
+    
+    
 	public:
 		using value_type = D; // standard typedef
 
